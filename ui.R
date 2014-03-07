@@ -68,10 +68,9 @@ shinyUI(pageWithSidebar(
                     
             tabPanel("Summary",
                      h3("Annual Michigan Education Finances, inflation-adjusted"),
-                     plotOutput("stateTotals.plot", height="700px", width="600px"),
-                     tableOutput("stateTotals.dt") # put these in a column format; make prettier
-                     
-                     # explanatory text
+                     tableOutput("stateTotals.dt"),
+                     plotOutput("stateTotals.plot", height="700px", width="600px")
+                                                              
                      ),
             
             tabPanel("County Comparison",
