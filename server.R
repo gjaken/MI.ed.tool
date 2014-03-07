@@ -38,16 +38,40 @@ shinyServer(
                                     TCHR_SAL.AVG.COUNTY   = round(TCHR_SAL.AVG.COUNTY,-2),
                                     PUPIL.PER.TCHR.COUNTY = round(PUPIL.PER.TCHR.COUNTY,0)
             )]
+        })        
+
+        # Tab 1: Statewide Table and Charts, annual data ----------------------------------------------------  
+        output$stateTotals.dt <- renderTable({
+            bulletin1014.state[, list(YEAR, "Revenue per Pupil" = REV.PER.PUPIL.STATE, "Expenditure per Pupil" = EXP.PER.PUPIL.STATE, "Teacher Salary per Pupil" = TCHR_SA.PER.PUPIL.STATE, "Average Teacher Salary" = TCHR_SAL.AVG.STATE, "Student / Teacher Ratio" = PUPIL.PER.TCHR.STATE)]
+        }, include.rownames=FALSE)
+        
+        output$stateTotals.plot <- renderPlot({
+            # facet label function
+            fin.data.names <- list(
+                "REV.PER.PUPIL.STATE" = "Revenue per Pupil",
+                "EXP.PER.PUPIL.STATE" = "Expenditure per Pupil",
+                "TCHR_SA.PER.PUPIL.STATE" = "Teacher Salary per Pupil",
+                "TCHR_SAL.AVG.STATE" = "Average Teacher Salary",
+                "PUPIL.PER.TCHR.STATE" = "Student / Teacher Ratio")
+            
+            fin.data_labeller <- function(variable, value) {
+                return(fin.data.names[value])
+            }
+            
+            # melt and filter for plotting                 
+            p <- ggplot(data = melt(bulletin1014.state[, list(YEAR, REV.PER.PUPIL.STATE, EXP.PER.PUPIL.STATE, TCHR_SA.PER.PUPIL.STATE, TCHR_SAL.AVG.STATE, PUPIL.PER.TCHR.STATE)],
+                                    id="YEAR")) +
+                geom_line(aes(x = YEAR, y = value, color = variable, name = "datasets"), size = 1) +
+                facet_grid(variable ~ ., scale = 'free_y', labeller = fin.data_labeller)+
+                xlab("Year") + 
+                ylab("Values (in 2012 $)") +
+                ggtitle("Michigan Educational Financial Data") +
+                theme(legend.position = "none")
+            
+            print(p)                        
         })
         
-        output$download.1014 <- downloadHandler(    
-            filename = "bulletin1014.full.csv",
-            content = function(file) {                
-                write.csv(bulletin1014.full.dt, file)
-            }
-        )
-        
-        
+        # Tab 3: County Slider and Choropleth ----------------------------------------------------        
         output$outputSliderCounty <- renderUI({    
             MIcounty.map.dt.isolated <- isolate(MIcounty.map.reactive()) # pull in isolated data
             MIcounty.map.dt.isolated <- MIcounty.map.dt.isolated[YEAR == input$yearCounty]
@@ -103,36 +127,7 @@ shinyServer(
             print(p)                       
         })
         
-        output$stateTotals.dt <- renderTable({
-                bulletin1014.state[, list(YEAR, "Revenue per Pupil" = REV.PER.PUPIL.STATE, "Expenditure per Pupil" = EXP.PER.PUPIL.STATE, "Teacher Salary per Pupil" = TCHR_SA.PER.PUPIL.STATE, "Average Teacher Salary" = TCHR_SAL.AVG.STATE, "Student / Teacher Ratio" = PUPIL.PER.TCHR.STATE)]
-        }, include.rownames=FALSE)
-        
-        output$stateTotals.plot <- renderPlot({
-            # facet label function
-            fin.data.names <- list(
-                "REV.PER.PUPIL.STATE" = "Revenue per Pupil",
-                "EXP.PER.PUPIL.STATE" = "Expenditure per Pupil",
-                "TCHR_SA.PER.PUPIL.STATE" = "Teacher Salary per Pupil",
-                "TCHR_SAL.AVG.STATE" = "Average Teacher Salary",
-                "PUPIL.PER.TCHR.STATE" = "Student / Teacher Ratio")
-            
-            fin.data_labeller <- function(variable, value) {
-                return(fin.data.names[value])
-            }
-            
-            # melt and filter for plotting                 
-            p <- ggplot(data = melt(bulletin1014.state[, list(YEAR, REV.PER.PUPIL.STATE, EXP.PER.PUPIL.STATE, TCHR_SA.PER.PUPIL.STATE, TCHR_SAL.AVG.STATE, PUPIL.PER.TCHR.STATE)],
-                                    id="YEAR")) +
-                geom_line(aes(x = YEAR, y = value, color = variable, name = "datasets"), size = 1) +
-                facet_grid(variable ~ ., scale = 'free_y', labeller = fin.data_labeller)+
-                xlab("Year") + 
-                ylab("Values (in 2012 $)") +
-                ggtitle("Michigan Educational Financial Data") +
-                theme(legend.position = "none")
-            
-            print(p)                        
-        })
-        
+        # Tab 3: County Comparison Table and UI ----------------------------------------------------  
         output$county.comp.table <- renderTable({
             if(is.null(input$county1) | is.null(input$county2) | is.null(input$yearCounty)) # Check for renderUI inputs before loading. If null, then return for now
                 return()
@@ -215,6 +210,14 @@ shinyServer(
             )
             
         })
+        
+        # Tab 4: Explore Bulletin 1014 ----------------------------------------------------  
+        output$download.1014 <- downloadHandler(    
+            filename = "bulletin1014.full.csv",
+            content = function(file) {                
+                write.csv(bulletin1014.full.dt, file)
+            }
+        )
         
         output$bulletin1014.full.dt <- renderDataTable({
             bulletin1014.full.dt[, list(YEAR, DISTNAME, DISTCOUNTY, AVG.FTE, RNK.FTE, LOCREV, AVG.LOCREV, RNK.LOCREV, STREV, AVG.STREV, RNK.STREV, FEDREV, AVG.FEDREV, RNK.FEDREV, TOTREV, AVG.TOTREV, RNK.TOTREV, TOTEXP, AVG.TOTEXP, RNK.TOTEXP, T.SAL, AVG.T.SAL, RNK.T.SAL, P.TCHR, AVG.P.TCHR, RNK.P.TCH)]

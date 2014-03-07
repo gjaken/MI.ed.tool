@@ -19,6 +19,4 @@ color:#ffffff;
 #stateTotals\.dt tr:nth-child(odd), #county\.comp\.table tr:nth-child(odd){ background-color:#EAF2D3; }
 #stateTotals\.dt tr:nth-child(even), #county\.comp\.table tr:nth-child(even)    { background-color:#ffffff; }
 
-#bulletin1014\.full\.dt tfoot {display:none;}
-
-/*DataTables_Table_0*/
+/*#bulletin1014\.full\.dt tfoot {display:none;}*/
