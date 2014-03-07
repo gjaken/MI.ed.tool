@@ -9,13 +9,15 @@ shinyUI(pageWithSidebar(
     
     # Sidebar with a select box input for year
     sidebarPanel( 
-        p("Exploring Michigan Education Financial Data with Bulletin 1014."),
+        h5("Exploring Michigan Education Financial Data with Bulletin 1014."),
         br(),
         
         # Tab 1: Summary
-#         conditionalPanel(condition = "input.tabs == 'Summary'"    
-#                          # Other useful links ???                      
-#          ),
+        conditionalPanel(condition = "input.tabs == 'Summary'",
+                         p("The Bulletin 1014 contains various pieces of financial information about Michigan Public Schools including revenue and expenditure per pupil. They also include the fall pupil count, average teacher salary, and taxable value information."),
+                         a("Find out more at the Michigan Department of Education", href="http://www.michigan.gov/mde/0,1607,7-140-6530_6605-21514--,00.html", target = "_blank"),
+                         br()
+         ),
         
         
         # Tab 3: County Comparison
@@ -65,7 +67,7 @@ shinyUI(pageWithSidebar(
         tabsetPanel(id = "tabs",
                     
             tabPanel("Summary",
-                     h3("Statewide Education Finances, inflation-adjusted"),
+                     h3("Annual Michigan Education Finances, inflation-adjusted"),
                      plotOutput("stateTotals.plot", height="700px", width="600px"),
                      tableOutput("stateTotals.dt") # put these in a column format; make prettier
                      
