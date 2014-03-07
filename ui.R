@@ -43,7 +43,9 @@ shinyUI(pageWithSidebar(
                                                                       "Revenue per Pupil"        = "REV.PER.PUPIL.COUNTY",                                    
                                                                       "Student/Teacher Ratio"    = "PUPIL.PER.TCHR.COUNTY"),
                                                           selected = "EXP.PER.PUPIL.COUNTY"
-                                              )     
+                                              ),
+                                              
+                                              p("County names appear in the center of the county.")
                              )
                          )
         ),
@@ -55,7 +57,10 @@ shinyUI(pageWithSidebar(
                          a("Bulletin 1014 Home (Michigan Department of Education)", href="http://www.michigan.gov/mde/0,1607,7-140-6530_6605-21514--,00.html", target = "_blank"),
                          br(),
                          downloadButton("download.1014", label = "Download Bulletin 1014 Dataset (2004-2012)")                
-        )
+        ),
+        
+        br(),
+        HTML("<hr><p>This project brought to you by <a href='http://www.linkedin.com/pub/g-jake-nagel/10/36b/47'>Jake Nagel</a></p>")
                
     ),
    
