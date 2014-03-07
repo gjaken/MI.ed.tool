@@ -48,9 +48,9 @@ shinyServer(
         )
         
         
-        output$outputSlider <- renderUI({    
+        output$outputSliderCounty <- renderUI({    
             MIcounty.map.dt.isolated <- isolate(MIcounty.map.reactive()) # pull in isolated data
-            
+            MIcounty.map.dt.isolated <- MIcounty.map.dt.isolated[YEAR == input$yearCounty]
             # set min, max, med, sd variables based on dataset            
             c.med <- median(MIcounty.map.dt.isolated[[input$fldnm]])
             c.sd  <- sd(MIcounty.map.dt.isolated[[input$fldnm]])
@@ -68,12 +68,13 @@ shinyServer(
             
         })
         
-        output$MIcounty.facet.map <- renderPlot({
+        output$MI.county.choro.map <- renderPlot({
             # code to set range
-            if(is.null(input$inputSlider)) # Check for renderUI inputs before loading. If null, then return for now
+            if(is.null(input$inputSlider) | !input$showPlotCounty) # Check for renderUI inputs before loading. If null, then return for now
                 return()
             
             MIcounty.map.dt.isolated <- isolate(MIcounty.map.reactive()) # pull in isolated dataset
+            MIcounty.map.dt.isolated <- MIcounty.map.dt.isolated[YEAR == input$yearCounty]
             fldnm.isolated <- isolate(input$fldnm) # pull in isolated field name (fldnm)
             
             MIcounty.map.dt.isolated[[fldnm.isolated]] <- pmax(MIcounty.map.dt.isolated[[fldnm.isolated]], input$inputSlider[1]) # sets min
@@ -87,24 +88,24 @@ shinyServer(
                               "PUPIL.PER.TCHR.COUNTY" = "darkred")
             
             # code for chart
-            p<- ggplot(data = MIcounty.map.dt.isolated, 
+            p<- ggplot(data = MIcounty.map.dt.isolated,
                        aes(x = long, y = lat, group = group)) + 
                 labs(title = "Michigan Education: Per Pupil Finances") +
                 geom_polygon(aes_string(fill = fldnm.isolated)) + 
                 scale_fill_gradient(high = fld.clr, low = "white") + 
-                facet_wrap(~ YEAR, ncol = 3) + 
                 geom_path(color = "black", linestyle = 2) +
+                geom_text(data = MIcounty.map.dt.isolated[subregion == input$county1 | subregion == input$county2], aes(x = clong, y = clat, label = subregion), size=5) +
                 coord_equal() +
                 theme(axis.title = element_blank(),
                       axis.text = element_blank(),
                       axis.ticks = element_blank())
             
-            print(p)
+            print(p)                       
         })
         
         output$stateTotals.dt <- renderTable({
-            bulletin1014.state[, list(YEAR, "Revenue per Pupil" = REV.PER.PUPIL.STATE, "Expenditure per Pupil" = EXP.PER.PUPIL.STATE, "Teacher Salary per Pupil" = TCHR_SA.PER.PUPIL.STATE, "Average Teacher Salary" = TCHR_SAL.AVG.STATE, "Student / Teacher Ratio" = PUPIL.PER.TCHR.STATE)]
-        })
+                bulletin1014.state[, list(YEAR, "Revenue per Pupil" = REV.PER.PUPIL.STATE, "Expenditure per Pupil" = EXP.PER.PUPIL.STATE, "Teacher Salary per Pupil" = TCHR_SA.PER.PUPIL.STATE, "Average Teacher Salary" = TCHR_SAL.AVG.STATE, "Student / Teacher Ratio" = PUPIL.PER.TCHR.STATE)]
+        }, include.rownames=FALSE)
         
         output$stateTotals.plot <- renderPlot({
             # facet label function
@@ -133,17 +134,17 @@ shinyServer(
         })
         
         output$county.comp.table <- renderTable({
-            if(is.null(input$county1) | is.null(input$county2) | is.null(input$year)) # Check for renderUI inputs before loading. If null, then return for now
+            if(is.null(input$county1) | is.null(input$county2) | is.null(input$yearCounty)) # Check for renderUI inputs before loading. If null, then return for now
                 return()
             
-            total1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$year,
+            total1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$yearCounty,
                                             list("Expenditure" = round(TOTEXP.COUNTY),
                                                  "Revenue" = round(TOTREV.COUNTY),
                                                  "Teacher Salary" = round(TCHR.SAL.COUNTY),
                                                  "Number of Teachers" = round(TCHR.NUM.COUNTY),
                                                  "Number of Pupils" = round(PUPIL.NUM.COUNTY))])
             
-            per.pupil1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$year,
+            per.pupil1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$yearCounty,
                                                 list("Expenditure" = round(EXP.PER.PUPIL.COUNTY),
                                                      "Revenue" = round(REV.PER.PUPIL.COUNTY),
                                                      "Teacher Salary" = round(TCHR_SA.PER.PUPIL.COUNTY),
@@ -151,21 +152,21 @@ shinyServer(
                                                      "Number of Pupils" = "")])
             
             
-            per.teacher1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$year,
+            per.teacher1 <- t(bulletin1014.county[DISTCOUNTY == input$county1 & YEAR == input$yearCounty,
                                                   list("Expenditure" = "",
                                                        "Revenue" = "",
                                                        "Teacher Salary" = round(TCHR_SAL.AVG.COUNTY),
                                                        "Number of Teachers" = "",
                                                        "Number of Pupils" = round(PUPIL.PER.TCHR.COUNTY))])    
             
-            total2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$year,
+            total2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$yearCounty,
                                             list("Expenditure" = round(TOTEXP.COUNTY),
                                                  "Revenue" = round(TOTREV.COUNTY),
                                                  "Teacher Salary" = round(TCHR.SAL.COUNTY),
                                                  "Number of Teachers" = round(TCHR.NUM.COUNTY),
                                                  "Number of Pupils" = round(PUPIL.NUM.COUNTY))])
             
-            per.pupil2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$year,
+            per.pupil2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$yearCounty,
                                                 list("Expenditure" = round(EXP.PER.PUPIL.COUNTY),
                                                      "Revenue" = round(REV.PER.PUPIL.COUNTY),
                                                      "Teacher Salary" = round(TCHR_SA.PER.PUPIL.COUNTY),
@@ -173,7 +174,7 @@ shinyServer(
                                                      "Number of Pupils" = "")])
             
             
-            per.teacher2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$year,
+            per.teacher2 <- t(bulletin1014.county[DISTCOUNTY == input$county2 & YEAR == input$yearCounty,
                                                   list("Expenditure" = "",
                                                        "Revenue" = "",
                                                        "Teacher Salary" = round(TCHR_SAL.AVG.COUNTY),
@@ -192,7 +193,7 @@ shinyServer(
         })
         
         output$year.header <- renderText({
-            paste("Side-by-Side County Comparison for ", input$year, ", inflation-adjusted", sep="")
+            paste("Side-by-Side County Comparison for ", input$yearCounty, ", inflation-adjusted", sep="")
         })
         
         output$outputSelecter.County1 <- renderUI({            
