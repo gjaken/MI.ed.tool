@@ -17,22 +17,6 @@ shinyUI(pageWithSidebar(
 #                          # Other useful links ???                      
 #          ),
         
-        # Tab 2: District Comparison
-        conditionalPanel(condition = "input.tabs == 'District Comparison'",
-                         wellPanel(
-                             selectInput("yearDistrict", "Select year for district comparison",
-                                         choices = 2004:2012,
-                                         selected = 2012
-                             )#,
-                             
-#                              uiOutput("outputSelecter.District1"), # district1 selection menu. "" is default.
-#                              uiOutput("outputSelecter.District2") # district2 selection menu. "" is default.  
-                             
-                             # show choropleth plot
-                             ## add slider if checked, and plot
-                         )
-
-        ),        
         
         # Tab 3: County Comparison
         conditionalPanel(condition = "input.tabs == 'County Comparison'",
@@ -87,12 +71,6 @@ shinyUI(pageWithSidebar(
                      
                      # explanatory text
                      ),
-            
-            tabPanel("District Comparison",
-                     h3("District Comparison, inflation-adjusted")#,
-#                      tableOutput("district.comp.table")
-#                      plotOutput("MI.district.choro.map", height="800px")
-                     ),   
             
             tabPanel("County Comparison",
                      h3("County Comparison, inflation-adjusted"), 

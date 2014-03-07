@@ -80,37 +80,6 @@ bulletin1014.county[, `:=` (EXP.PER.PUPIL.COUNTY     = TOTEXP.COUNTY / PUPIL.NUM
                             TCHR_SAL.AVG.COUNTY      = TCHR.SAL.COUNTY / TCHR.NUM.COUNTY,
                             PUPIL.PER.TCHR.COUNTY    = PUPIL.NUM.COUNTY / TCHR.NUM.COUNTY)]                    
 
-
-
-# Aggregate by year, District ---------------------------------------------
-# sum totals of data into counties, for comparison
-bulletin1014.district <- bulletin1014.dt[, list(TOTEXP.DISTRICT = sum(TOTEXP),
-                                              TOTREV.DISTRICT = sum(TOTREV),
-                                              TCHR.SAL.DISTRICT = sum(T.SAL),
-                                              TCHR.NUM.DISTRICT = sum(P.TCHR),
-                                              PUPIL.NUM.DISTRICT = sum(AVG.FTE)
-),                                       
-by= list(YEAR, DISTNAME)]
-
-# inflation adjust
-cpi$adjuster <- cpi[Date == date.range[2], Value] / cpi[, Value] # create cpi adjustor, to inflation adjust
-cpi <- cpi[Date >= date.range[1] & Date <= date.range[2]] # date.range = 2004-12-31, 2012-12-31
-cpi <- cpi[order(Date)] # to match ordered date format of .SD 
-
-bulletin1014.district[, `:=` (TOTEXP.DISTRICT = TOTEXP.DISTRICT * cpi$adjuster,
-                            TOTREV.DISTRICT = TOTREV.DISTRICT * cpi$adjuster,
-                            TCHR.SAL.DISTRICT = TCHR.SAL.DISTRICT * cpi$adjuster), 
-                    by = DISTNAME]
-
-# create new ratio variables
-bulletin1014.district[, `:=` (EXP.PER.PUPIL.DISTRICT     = TOTEXP.DISTRICT / PUPIL.NUM.DISTRICT,
-                            REV.PER.PUPIL.DISTRICT     = TOTREV.DISTRICT / PUPIL.NUM.DISTRICT,
-                            TCHR_SA.PER.PUPIL.DISTRICT = TCHR.SAL.DISTRICT / PUPIL.NUM.DISTRICT,
-                            TCHR_SAL.AVG.DISTRICT      = TCHR.SAL.DISTRICT / TCHR.NUM.DISTRICT,
-                            PUPIL.PER.TCHR.DISTRICT    = PUPIL.NUM.DISTRICT / TCHR.NUM.DISTRICT)]                    
-
-
-
 # COUNTY: Import map and combine data tables --------------------------------------------------
 MIcounty.map.dt <- data.table(map_data("county", "michigan")) # import as data table
 MIcounty.map.dt$subregion <- toupper(MIcounty.map.dt$subregion) # standardize case
@@ -120,20 +89,9 @@ MIcounty.map.dt <- merge(MIcounty.map.dt, bulletin1014.county,by="subregion", al
 county.centers<- MIcounty.map.dt[,list(clat = mean(lat), clong = mean(long)),by=subregion] # create centers for county name tags
 MIcounty.map.dt<- merge(MIcounty.map.dt,county.centers, by="subregion", allow.cartesian=TRUE) # THIS IS THE FINAL MI COUNTY DATA TABLE
 
-
-# DISTRICT: Import map and combine data tables ----------------------------
-MIdistrict.map.shapefile <- readShapeSpatial("school_d_mi/school_miv13a.shp") # read from map shapefile
-MIdistrict.map.shapefile$id <- rownames(MIdistrict.map.shapefile@data)
-MIdistrict.map.dt <- data.table(fortify(MIdistrict.map.shapefile, region="id"))
-MIdistrict.map.dt <- merge(MIdistrict.map.dt, MIdistrict.map.shapefile@data, by="id")
-
 # Write output for Shiny to upload ----------------------------------------
 
 write.csv(bulletin1014.dt, "MI.ed.tool/bulletin1014.dt.csv", row.names=FALSE)
 
 write.csv(MIcounty.map.dt, "MI.ed.tool/MIcounty.map.dt.csv", row.names=FALSE)
 write.csv(bulletin1014.county, "MI.ed.tool/bulletin1014.county.csv", row.names=FALSE)
-
-write.csv(MIdistrict.map.dt, "MI.ed.tool/MIdistrict.map.dt.csv", row.names=FALSE)
-write.csv(bulletin1014.district, "MI.ed.tool/bulletin1014.district.csv", row.names=FALSE)
-
