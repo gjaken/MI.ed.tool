@@ -14,9 +14,9 @@ shinyUI(pageWithSidebar(
         
         # Tab 1: Summary
         conditionalPanel(condition = "input.tabs == 'Summary'",
-                         p("The Bulletin 1014 contains various pieces of financial information about Michigan Public Schools including revenue and expenditure per pupil. They also include the fall pupil count, average teacher salary, and taxable value information."),
-                         a("Find out more at the Michigan Department of Education", href="http://www.michigan.gov/mde/0,1607,7-140-6530_6605-21514--,00.html", target = "_blank"),
-                         br()
+                         HTML("<p>Bulletin 1014, put out each year by the Michigan Department of Education, is a core financial document for Michgian.<br><br>                            
+                              Find Find out more about <a href='http://www.michigan.gov/mde/0,1607,7-140-6530_6605-21514--,00.html'>Bulletin 1014</a>.</p>"
+                          )                         
          ),
         
         
@@ -33,7 +33,7 @@ shinyUI(pageWithSidebar(
                          ),
                          
                          wellPanel(
-                             checkboxInput("showPlotCounty", "Show County Choropleth Plot?", value = FALSE),
+                             checkboxInput("showPlotCounty", "Show County Choropleth Plot?", value = TRUE),
                              conditionalPanel(condition = "input.showPlotCounty",
                                               uiOutput("outputSliderCounty"), 
                                               
@@ -59,7 +59,6 @@ shinyUI(pageWithSidebar(
                          downloadButton("download.1014", label = "Download Bulletin 1014 Dataset (2004-2012)")                
         ),
         
-        br(),
         HTML("<hr><p>This project brought to you by <a href='http://www.linkedin.com/pub/g-jake-nagel/10/36b/47'>Jake Nagel</a></p>")
                
     ),
@@ -74,8 +73,7 @@ shinyUI(pageWithSidebar(
             tabPanel("Summary",
                      h3("Annual Michigan Education Finances, inflation-adjusted"),
                      tableOutput("stateTotals.dt"),
-                     plotOutput("stateTotals.plot", height="700px", width="600px")
-                                                              
+                     plotOutput("stateTotals.plot", height="700px", width="600px")                                                              
                      ),
             
             tabPanel("County Comparison",
